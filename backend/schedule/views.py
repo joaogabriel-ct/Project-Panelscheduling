@@ -14,7 +14,7 @@ class ScheduleRetriveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ScheduleStatusViewSet(generics.ListCreateAPIView):
-    queryset = ScheduleStatus
+    queryset = ScheduleStatus.objects.all()
     serializer_class = ScheduleStatusSerializer
 
 

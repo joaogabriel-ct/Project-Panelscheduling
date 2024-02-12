@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from document.models import Document
 
 """
 | status = STATUS da operação         |
@@ -29,12 +30,15 @@ class Schedule(models.Model):
     id_user = models.ForeignKey(User,
                                 on_delete=models.CASCADE,
                                 related_name='user_scheduled')
+    id_document = models.ForeignKey(Document, on_delete=models.CASCADE,
+                                    related_name='doc_schedule')
     campaign_name = models.CharField(max_length=200)
     schedule_date = models.DateField(null=True, blank=True)
     hour_schedule = models.TimeField(auto_now_add=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.ForeignKey(ScheduleStatus, on_delete=models.CASCADE,
-                               related_name='schedule_status')
+                               related_name='schedule_status', null=True,
+                               blank=True)
 
     def __str__(self):
         return f"""

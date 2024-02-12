@@ -15,13 +15,9 @@ from authentication.models import User
 
 
 class Document(models.Model):
-    document = models.FileField(upload_to='document/')
+    document = models.FileField(upload_to='temp_arquivos/')
     id_user = models.ForeignKey(User, on_delete=models.CASCADE,
                                 related_name='User_scheduled_document')
-    appointment = models.ForeignKey('schedule.Schedule',
-                                    on_delete=models.CASCADE,
-                                    related_name='related_documents',
-                                    null=True, blank=True)
     name = models.CharField(max_length=200)
     number = models.IntegerField(null=True, blank=True)
     number_valid = models.IntegerField(null=True, blank=True)

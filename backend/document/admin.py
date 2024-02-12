@@ -7,7 +7,6 @@ class DocumentAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'id_user',
-        'appointment',
         'name',
         'number',
         'number_valid',

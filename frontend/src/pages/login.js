@@ -5,6 +5,7 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Image from 'next/image';
 import Swal from 'sweetalert2';
+import { authService } from '@/service/auth/authService';
 
 const schema = yup.object().shape({
   username: yup.string().required('Login não pode estar vazio.'),
@@ -23,7 +24,10 @@ export default function Login() {
   const router = useRouter();
 
   const onSubmit = async data => {
-    console.log(data)
+      const loginResult = authService.login({
+        username: data.username,
+        password: data.password,
+      })
   };
 
   return (
