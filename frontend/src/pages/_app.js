@@ -4,7 +4,7 @@ import '../styles/globals.css';
 function MyApp({ Component, pageProps }) {
   return (
     <>
-      <Header />
+      {!pageProps.hideHeader && <Header />}
       <Component {...pageProps} />
     </>
   );

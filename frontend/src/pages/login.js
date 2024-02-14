@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import Image from 'next/image';
 import Swal from 'sweetalert2';
 import { authService } from '@/service/auth/authService';
 
@@ -24,10 +23,35 @@ export default function Login() {
   const router = useRouter();
 
   const onSubmit = async data => {
-      const loginResult = authService.login({
+    try {
+      const loginResult = await authService.login({
         username: data.username,
         password: data.password,
-      })
+      });
+
+      if (loginResult.success) {
+        const session = await authService.getSession();
+        console.log(session);
+        if (session) {
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 500);
+        } else {
+          throw new Error('Falha na autenticação');
+        }
+      } else {
+        throw new Error(loginResult.message || 'Usuário ou senha incorretos!');
+      }
+    } catch (error) {
+      console.error('Erro no login', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro no login',
+        text: error.message,
+        confirmButtonText: 'Tentar novamente',
+        confirmButtonColor: '#3085d6',
+      });
+    }
   };
 
   return (

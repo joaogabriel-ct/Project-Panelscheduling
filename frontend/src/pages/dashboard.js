@@ -1,4 +1,7 @@
 import Appointment from "@/components/tableCustomers";
+import { withSession } from "@/service/auth/session";
+import { redirect } from "next/dist/server/api-utils";
+import Swal from 'sweetalert2';
 
 
 
@@ -21,7 +24,15 @@ function Dashboard(session) {
       })
   }, [session]);
 
-  
+  if (!session) {
+    Swal.fire({
+        title: 'Usuário não autenticado',
+        text: 'Faça login para ver esta página.',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+    });
+    return null; 
+}
 
   return (
     <div className="container px-4 sm:px-6 lg:px-8 mx-auto max-w-full sm:max-w-md lg:max-w-3xl xl:max-w-4xl 2xl:max-w-6xl bg-white border rounded-md">
@@ -33,3 +44,16 @@ function Dashboard(session) {
 }
 
 export default Dashboard;
+export const getServerSideProps = withSession(async (ctx) => {
+  const session = ctx.req.session;
+
+  if(!session){
+    return{
+      redirect:{
+        destination:'/login',
+        permanent:false,
+      },
+    };
+  }
+  return {props: {session}}
+})
