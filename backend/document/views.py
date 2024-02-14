@@ -17,16 +17,9 @@ class DocumentUploadView(APIView):
         errors = []
 
         for file in files:
-            # Cria uma cópia do QueryDict porque é imutável
             data = request.data.copy()
-            # Atualiza o QueryDict com o arquivo atual
             data['document'] = file
-            # Opcional: Adiciona/Atualiza outros campos se necessário
-            # data['id_user'] = <id_do_usuario>
-            # data['name'] = file.name ou outro valor
-
             serializer = DocumentSerializer(data=data)
-
             if serializer.is_valid():
                 serializer.save()
                 saved_files.append(serializer.data)

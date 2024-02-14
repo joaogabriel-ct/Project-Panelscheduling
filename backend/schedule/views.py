@@ -12,6 +12,12 @@ class ScheduleRetriveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
 
+    def get_serializer_context(self):
+        """
+        Garante que o contexto inclua o request.
+        """
+        return {'request': self.request}
+
 
 class ScheduleStatusViewSet(generics.ListCreateAPIView):
     queryset = ScheduleStatus.objects.all()

@@ -17,6 +17,7 @@ class ValidateTokenView(APIView):
                 'user': {
                     'username': user.username,
                     'id': user.id,
+                    'is_superUser': user.is_superuser
                     }
                 }
         })

@@ -11,7 +11,7 @@ from document.models import Document
 
 class ScheduleStatus(models.Model):
     status = models.BooleanField()
-    report = models.FileField(upload_to='reported/')
+    report = models.FileField(upload_to='reported/', null=True, blank=True)
     reported = models.JSONField(null=True, blank=True)
 
 

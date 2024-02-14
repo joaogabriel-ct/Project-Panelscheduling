@@ -2,9 +2,13 @@
 import { useMemo, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
-import ModalEditAppointment from './modalEditAppointment';
-import ModalView from './modalViewAppointment';
-export default function Appointment({ salesData }) {
+import ModalEditAppointment from '../modalEditAppointment';
+import ModalView from '../modalViewAppointment';
+
+
+
+
+export default function AppointmentAdmin({ salesData }) {
     const customStyles = {
         rows: {
             style: {
@@ -85,7 +89,7 @@ export default function Appointment({ salesData }) {
             allowOverflow: true,
             button: true,
             cell: row => (
-                <div className="flex items-center justify-center">
+                <div className="flex justify-start border rounded-md">
                     <button
                         onClick={() => handleEditClick(row)}
                         className="mr-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:outline-none"
@@ -149,6 +153,7 @@ export default function Appointment({ salesData }) {
             />
             {isModalOpen && selectedAppointment && (
                 <ModalView
+                    
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     appointmentData={selectedAppointment}
@@ -157,6 +162,7 @@ export default function Appointment({ salesData }) {
 
             {isEditModalOpen && editingAppointment && (
                 <ModalEditAppointment
+                    
                     isOpen={isEditModalOpen}
                     onClose={() => setIsEditModalOpen(false)}
                     appointmentData={editingAppointment}

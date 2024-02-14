@@ -68,64 +68,78 @@ export default function Modal({ isOpen, onClose }) {
     };
 
 
-    return(
-        <div style = {{ zIndex: 1000 }} className = "fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full" onClick = { onClose } >
-    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={(e) => e.stopPropagation()}>
-        <form onSubmit={formik.handleSubmit}>
-            <h3 className="text-lg leading-6 font-medium text-gray-900">Agendar Mailing</h3>
-            <div className="mt-2">
-                <input
-                    type="text"
-                    name="nomeAgendamento"
-                    placeholder="Nome do Agendamento"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.nomeAgendamento}
-                    className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
-                />
-                <input
-                    type="date"
-                    name="dataAgendamento"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.dataAgendamento}
-                    className="mb-4 px-3 py-2 border rounded-md w-full"
-                />
-                <input
-                    type="time"
-                    name="timeAgendamento" // Corrigido para usar o nome correto
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.timeAgendamento}
-                    className="mb-4 px-3 py-2 border rounded-md w-full"
-                />
-                <input
-                    type="file"
-                    name="arquivoAgendamento"
-                    onChange={handleFileChange}
-                    onBlur={formik.handleBlur}
-                    className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
-                    accept=".txt, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    multiple
-                />
-                <div className="mt-2">
-                    {formik.values.arquivoAgendamento && Array.from(formik.values.arquivoAgendamento).map((file, index) => (
-                        <div key={index} className="text-sm mt-1">
-                            {file.name}
+    return (
+        <div style={{ zIndex: 1000 }} className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full p-4" onClick={onClose} >
+            <div className="relative bg-white border shadow-lg rounded-md w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl xl:max-w-2xl p-5" onClick={(e) => e.stopPropagation()}>
+                <form onSubmit={formik.handleSubmit}>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">Agendar Mailing</h3>
+                    <div className="mt-2">
+                        <div>
+                            <label>Digite nome do agendamento</label>
+                        <input
+                            type="text"
+                            name="nomeAgendamento"
+                            placeholder="Nome do Agendamento"
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            value={formik.values.nomeAgendamento}
+                            className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
+                        />
                         </div>
-                    ))}
-                </div>
+                        <div className="flex flex-wrap -mx-3 mb-4">
+                            <div className="w-full md:w-1/2 px-3 mb-4 md:mb-0">
+                                <label>Selecione uma Data</label>
+                                <input
+                                    type="date"
+                                    name="dataAgendamento"
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.dataAgendamento}
+                                    className="mb-4 px-3 py-2 border rounded-md w-full"
+                                />
+                            </div>
+                            <div className="w-full md:w-1/2 px-3">
+                            <label>Selecione um horario</label>
+                                <input
+                                    type="time"
+                                    name="timeAgendamento"
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.timeAgendamento}
+                                    className="mb-4 px-3 py-2 border rounded-md w-full"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label>Selecione um arquivo</label>
+                        <input
+                            type="file"
+                            name="arquivoAgendamento"
+                            onChange={handleFileChange}
+                            onBlur={formik.handleBlur}
+                            className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
+                            accept=".txt, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                            multiple
+                        />
+                        </div>
+                        <div className="mt-2">
+                            {formik.values.arquivoAgendamento && Array.from(formik.values.arquivoAgendamento).map((file, index) => (
+                                <div key={index} className="text-sm mt-1">
+                                    {file.name}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex justify-end space-x-4 mt-3">
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 focus:outline-none"
+                        >
+                            Enviar
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div className="flex justify-end space-x-4 mt-3">
-                <button
-                    type="submit"
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 focus:outline-none"
-                >
-                    Enviar
-                </button>
-            </div>
-        </form>
-    </div>
         </div >
     );
 }
