@@ -9,6 +9,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         model = Document
         fields = [
             "id",
+            'document',
             "document_url",
             "id_user",
             "name",

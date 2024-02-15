@@ -32,22 +32,21 @@ export default function Login() {
       if (loginResult.success) {
         const session = await authService.getSession();
         console.log(session);
-        if (session) {
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 500);
+        if (session.data.user.is_superUser) {
+          router.push('/admin/dashboard');
         } else {
-          throw new Error('Falha na autenticação');
+          router.push('/dashboard');
         }
       } else {
         throw new Error(loginResult.message || 'Usuário ou senha incorretos!');
       }
     } catch (error) {
       console.error('Erro no login', error);
+      // Utilizando SweetAlert para mostrar o erro
       Swal.fire({
         icon: 'error',
         title: 'Erro no login',
-        text: error.message,
+        text: error.message || 'Ocorreu um erro desconhecido. Tente novamente.',
         confirmButtonText: 'Tentar novamente',
         confirmButtonColor: '#3085d6',
       });

@@ -19,8 +19,8 @@ export default function ModalView({ isOpen, onClose, appointmentData }) {
                     <p>Nome do Agendamento: {appointmentData?.campaign_name}</p>
                     <p>Data do Agendamento: {appointmentData ? formatDate(appointmentData.schedule_date) : ''}</p>
                     <h2><strong>Status do agendamento </strong></h2>
-                    <p>Ocorreu: {appointmentData?.STATUS.status}</p>
-                    <p>detalhes: {appointmentData?.STATUS.reported}</p>
+                    <p>Ocorreu: {appointmentData?.STATUS?.status}</p>
+                    <p>detalhes: {appointmentData?.STATUS?.reported}</p>
                     <h2><strong>Detalhes do Documento </strong></h2>
                     <p>nome do arquivo: {appointmentData?.DOCUMENT.name}</p>
                     <p>Total de numeros: {appointmentData?.DOCUMENT.number}</p>

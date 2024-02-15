@@ -56,32 +56,32 @@ export default function AppointmentAdmin({ salesData }) {
 
     const Columns = [
         {
+            name: 'Agendado por:',
+            selector: row => row.USER.username,
+            sortable: true,
+            cell: row => <a>{row.USER.username}</a>
+        },
+        {
             name: 'Nome agendamento',
             selector: row => row.campaign_name,
             sortable: true,
-            cell: row => <a href={`agenda/${row.id}`}>{row.campaign_name}</a>
+            cell: row => <a >{row.campaign_name}</a>
         },
         {
             name: 'Data do agendamento',
             selector: row => formatDate(row.schedule_date),
             sortable: true,
             cell: row => (
-                <a href={`agenda/${row.id}`}>
+                <a>
                     {formatDate(row.schedule_date)}
                 </a>
             )
         },
         {
-            name: 'Criado dia:',
-            selector: row => formatDate(row.created_at),
-            sortable: true,
-            cell: row => <a href={`agenda/${row.id}`}>{formatDate(row.created_at)}</a>
-        },
-        {
             name: 'numeros totais',
             selector: row => row.DOCUMENT.number_valid,
             sortable: true,
-            cell: row => <a href={`agenda/${row.id}`}> {row.DOCUMENT.number_valid}</a>
+            cell: row => <a > {row.DOCUMENT.number_valid}</a>
         },
         {
             name: 'Ações',

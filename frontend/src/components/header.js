@@ -5,6 +5,8 @@ import { useRouter } from 'next/router';
 import { useState } from "react";
 import Modal from "./dialogAppointment";
 
+
+
 export default function Header() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);

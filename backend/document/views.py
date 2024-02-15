@@ -5,9 +5,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import DocumentSerializer
 from .models import Document
+from rest_framework.permissions import IsAuthenticated
 
 
 class DocumentUploadView(APIView):
+    permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
@@ -33,5 +35,12 @@ class DocumentUploadView(APIView):
 
 
 class DocumentListView(ListAPIView):
-    queryset = Document.objects.all()
     serializer_class = DocumentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Document.objects.all()
+        else:
+            return Document.objects.filter(id_user=user)

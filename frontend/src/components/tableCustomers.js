@@ -5,6 +5,25 @@ import styled from 'styled-components';
 import ModalEditAppointment from './modalEditAppointment';
 import ModalView from './modalViewAppointment';
 export default function Appointment({ salesData }) {
+    if (!salesData || salesData.length === 0) {
+        console.error('salesData não está definido ou está vazio');
+        return (
+            <div style={{
+                margin: '20px',
+                padding: '20px',
+                backgroundColor: '#ffdddd',
+                borderLeft: '6px solid #f44336',
+                borderRadius: '5px',
+                color: '#333',
+            }}>
+                <h2>Dados Não Disponíveis</h2>
+                <p>Parece que não há dados de Agendamento disponíveis no momento.</p>
+                <p>Por favor, verifique se há Agendamento registrados ou tente novamente mais tarde.</p>
+                <p>Se o problema persistir, entre em contato com o suporte técnico.</p>
+            </div>
+        );
+    }
+
     const customStyles = {
         rows: {
             style: {
@@ -55,14 +74,14 @@ export default function Appointment({ salesData }) {
             name: 'Nome agendamento',
             selector: row => row.campaign_name,
             sortable: true,
-            cell: row => <a href={`agenda/${row.id}`}>{row.campaign_name}</a>
+            cell: row => <a>{row.campaign_name}</a>
         },
         {
             name: 'Data do agendamento',
             selector: row => formatDate(row.schedule_date),
             sortable: true,
             cell: row => (
-                <a href={`agenda/${row.id}`}>
+                <a>
                     {formatDate(row.schedule_date)}
                 </a>
             )
@@ -71,13 +90,13 @@ export default function Appointment({ salesData }) {
             name: 'Criado dia:',
             selector: row => formatDate(row.created_at),
             sortable: true,
-            cell: row => <a href={`agenda/${row.id}`}>{formatDate(row.created_at)}</a>
+            cell: row => <a>{formatDate(row.created_at)}</a>
         },
         {
             name: 'numeros totais',
             selector: row => row.DOCUMENT.number_valid,
             sortable: true,
-            cell: row => <a href={`agenda/${row.id}`}> {row.DOCUMENT.number_valid}</a>
+            cell: row => <a> {row.DOCUMENT.number_valid}</a>
         },
         {
             name: 'Ações',

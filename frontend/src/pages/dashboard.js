@@ -1,17 +1,19 @@
 import Appointment from "@/components/tableCustomers";
-import { withSession } from "@/service/auth/session";
+import { api } from "@/service/api";
+import { withSession, withSessionHOC } from "@/service/auth/session";
 import { redirect } from "next/dist/server/api-utils";
+import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 
 
 
-const { api } = require("@/service/api");
-const { useState, useEffect } = require("react");
 
-function Dashboard(session) {
+
+
+function Dashboard({session}) {
   const [data, setData] = useState({ appointment: [] });
   const [error, setError] = useState('');
-  
+ 
 
   useEffect(() => {
     api.get('agendamento/')
@@ -43,10 +45,11 @@ function Dashboard(session) {
   )
 }
 
-export default Dashboard;
-export const getServerSideProps = withSession(async (ctx) => {
-  const session = ctx.req.session;
 
+export default withSessionHOC(Dashboard);
+/* export const getServerSideProps = withSession(async (ctx) => {
+  const session = ctx.req.session;
+  
   if(!session){
     return{
       redirect:{
@@ -55,5 +58,5 @@ export const getServerSideProps = withSession(async (ctx) => {
       },
     };
   }
-  return {props: {session}}
-})
+  return {props: {session}};
+}) */

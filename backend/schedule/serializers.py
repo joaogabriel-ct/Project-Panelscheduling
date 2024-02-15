@@ -1,6 +1,13 @@
 from rest_framework import serializers
 from .models import Schedule, ScheduleStatus
 from document.serializers import DocumentSerializer
+from django.contrib.auth.models import User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
 
 
 class ScheduleStatusSerializer(serializers.ModelSerializer):
@@ -12,10 +19,11 @@ class ScheduleStatusSerializer(serializers.ModelSerializer):
 class ScheduleSerializer(serializers.ModelSerializer):
     STATUS = ScheduleStatusSerializer(source='status', required=False)
     DOCUMENT = DocumentSerializer(source='id_document', read_only=True)
+    USER = UserSerializer(source='id_user', read_only=True)
 
     class Meta:
         model = Schedule
-        fields = ['id', 'id_user', 'id_document', 'DOCUMENT', 'campaign_name',
+        fields = ['id', 'id_user', 'USER', 'id_document', 'DOCUMENT', 'campaign_name',
                   'schedule_date', 'hour_schedule', 'created_at', 'STATUS']
 
     def update(self, instance, validated_data):

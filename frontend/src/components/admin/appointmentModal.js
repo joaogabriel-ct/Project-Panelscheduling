@@ -75,14 +75,14 @@ export default function AppointmentEditModal({ appointment, onClose, onAppointme
                 </p>
 
                 {/* Verifica se existe o campo report no appointment */}
-                {appointment?.STATUS.report && (
-                    <p>
-                        <strong>Arquivo após a execução:</strong>
-                        <a href={appointment?.STATUS.report} download className="ml-2 text-blue-500 hover:text-blue-700">
-                            Relatorio de realizados
-                        </a>
-                    </p>
-                )}
+
+                <p>
+                    <strong>Arquivo após a execução:</strong>
+                    <a href={appointment?.STATUS?.report} download className="ml-2 text-blue-500 hover:text-blue-700">
+                        Relatorio de realizados
+                    </a>
+                </p>
+
 
                 {/* Formulário de atualização */}
                 <form onSubmit={formik.handleSubmit} className="space-y-4">
@@ -94,7 +94,7 @@ export default function AppointmentEditModal({ appointment, onClose, onAppointme
                     </div>
 
                     {/* Mostra o campo de upload somente se não existir o campo report */}
-                    {!appointment?.STATUS.report && (
+                    {!appointment?.STATUS?.report && (
                         <div>
                             <input type="file" name="report" onChange={(event) => formik.setFieldValue("report", event.currentTarget.files[0])} className="form-input mt-1 block w-full" />
                         </div>
