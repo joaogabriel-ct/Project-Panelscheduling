@@ -4,7 +4,7 @@ from .models import Document
 import pandas as pd
 
 
-@receiver(pre_save, sender=Document)
+
 def preprocess_file(sender, instance, **kwargs):
     # Verifica se o campo 'document' foi alterado
     if instance.document and instance.document.file:

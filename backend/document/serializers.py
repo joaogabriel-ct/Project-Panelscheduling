@@ -13,10 +13,6 @@ class DocumentSerializer(serializers.ModelSerializer):
             "document_url",
             "id_user",
             "name",
-            "number",
-            "number_valid",
-            "number_invalid",
-            "number_blockeds",
         ]
 
     def get_document_url(self, obj):

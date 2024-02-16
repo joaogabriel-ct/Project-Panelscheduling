@@ -19,10 +19,6 @@ class Document(models.Model):
     id_user = models.ForeignKey(User, on_delete=models.CASCADE,
                                 related_name='User_scheduled_document')
     name = models.CharField(max_length=200)
-    number = models.IntegerField(null=True, blank=True)
-    number_valid = models.IntegerField(null=True, blank=True)
-    number_invalid = models.IntegerField(null=True, blank=True)
-    number_blockeds = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.name

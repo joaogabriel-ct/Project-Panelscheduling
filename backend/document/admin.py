@@ -8,8 +8,4 @@ class DocumentAdmin(admin.ModelAdmin):
         'id',
         'id_user',
         'name',
-        'number',
-        'number_valid',
-        'number_invalid',
-        'number_blockeds',
     ]
