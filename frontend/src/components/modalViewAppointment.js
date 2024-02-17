@@ -7,6 +7,8 @@ const formatDate = (isoString) => {
 
     });
 };
+
+
 export default function ModalView({ isOpen, onClose, appointmentData }) {
     if (!isOpen) return null;
 
@@ -15,18 +17,20 @@ export default function ModalView({ isOpen, onClose, appointmentData }) {
             <div className="bg-white p-4 rounded-lg shadow-lg max-w-lg w-full">
                 <h3 className="font-bold text-lg">Detalhes do Agendamento</h3>
                 <div className="mt-2">
-                    <p>Criado em: {appointmentData ? formatDate(appointmentData.created_at) : ''}</p>
                     <p>Nome do Agendamento: {appointmentData?.campaign_name}</p>
                     <p>Data do Agendamento: {appointmentData ? formatDate(appointmentData.schedule_date) : ''}</p>
                     <h2><strong>Status do agendamento </strong></h2>
-                    <p>Ocorreu: {appointmentData?.STATUS?.status}</p>
-                    <p>detalhes: {appointmentData?.STATUS?.reported}</p>
+                    <p>Ocorreu: {appointmentData?.STATUS?.status }</p>
+                    {/* <p>detalhes: {appointmentData?.STATUS?.reported}</p> */}
                     <h2><strong>Detalhes do Documento </strong></h2>
-                    <p>nome do arquivo: {appointmentData?.DOCUMENT.name}</p>
-                    <p>Total de numeros: {appointmentData?.DOCUMENT.number}</p>
-                    <p>Total de numeros validos: {appointmentData?.DOCUMENT.number_valid}</p>
-                    <p>Total de numeros invalidos: {appointmentData?.DOCUMENT.number_invalid}</p>
-                    <p>Total de numeros bloqueados: {appointmentData?.DOCUMENT.number_blockeds}</p>
+                    <a href={appointmentData?.DOCUMENT?.document_url}
+                        download
+                        className="ml-2 text-blue-500 hover:text-blue-700">
+                        Arquivo de mídia
+                    </a>
+                    <p>Total de numeros: {appointmentData?.number}</p>
+                    <p>Total de numeros validos: {appointmentData?.number_valid}</p>
+                    <p>Total de numeros invalidos: {appointmentData?.number_invalid}</p>
                 </div>
                 <button
                     onClick={onClose}

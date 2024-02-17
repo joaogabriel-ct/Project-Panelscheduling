@@ -124,7 +124,8 @@ class TelefoneListCreate(generics.ListCreateAPIView):
         for numero in telefones_data:
             serializer = self.get_serializer(
                 data={
-                 'appointment_id': schedule_id
+                 'appointment_id': schedule_id,
+                 'numero': numero,
                     })
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)

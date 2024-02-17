@@ -4,6 +4,12 @@ import * as Yup from 'yup';
 import { api } from '@/service/api';
 import { authService } from '@/service/auth/authService';
 
+const selectStatus = [
+    { value: 'Agendado', label: 'Agendado' },
+    { value: 'Em andamento', label: 'Em andamento' },
+    { value: 'Finalizado', label: 'Finalizado' },
+    { value: 'Com Erro', label: 'Com Erro' },
+]
 
 // Componente ModalEditAppointment
 export default function ModalEditAppointment({ isOpen, onClose, appointmentData, onSave }) {
@@ -12,27 +18,31 @@ export default function ModalEditAppointment({ isOpen, onClose, appointmentData,
         initialValues: {
             nomeAgendamento: appointmentData?.campaign_name || '',
             dataAgendamento: appointmentData?.schedule_date || '',
+            status: appointmentData?.STATUS?.status || '',
             timeAgendamento: appointmentData?.hour_schedule ? appointmentData.hour_schedule.slice(0, 5) : '',
         },
         validationSchema: Yup.object({
             nomeAgendamento: Yup.string().required("O nome do agendamento é obrigatório"),
             dataAgendamento: Yup.date().required("A data do agendamento é obrigatória"),
-            timeAgendamento: Yup.string().required('O campo de horario é obrigatório')
+            timeAgendamento: Yup.string().required('O campo de horario é obrigatório'),
+            status: Yup.string().required('O campo de horario é obrigatório'),
         }),
         onSubmit: async (values) => {
+            const statusJson = JSON.stringify({ status: values.status });
             try {
                 const sessionResponse = await authService.getSession();
-                const session = sessionResponse.data; 
+                const session = sessionResponse.data;
                 const idUser = session.user.id;
                 console.log(appointmentData)
                 const formData = new FormData();
                 formData.append('campaign_name', values.nomeAgendamento);
                 formData.append('schedule_date', values.dataAgendamento);
                 formData.append('hour_schedule', values.timeAgendamento);
-                formData.append('id_document', appointmentData.DOCUMENT.id)
-                formData.append('id_user', idUser)
+                formData.append('id_document', appointmentData.DOCUMENT.id);
+                formData.append('id_user', idUser);
+                formData.append('STATUS', statusJson);
                 const putResponse = await api.put(`/agendado/${appointmentData.id}/`, formData);
-
+                onClose(false);
             } catch (error) {
                 console.error('Falha no processo:', error.message);
             }
@@ -81,6 +91,22 @@ export default function ModalEditAppointment({ isOpen, onClose, appointmentData,
                                     value={formik.values.timeAgendamento}
                                     className="mb-4 px-3 py-2 border rounded-md w-full"
                                 />
+                            </div>
+                            <div className="w-full px-3 mb-4">
+                                <label>Status do Agendamento</label>
+                                <select
+                                    name="status"
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.status}
+                                    className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
+                                >
+                                    {selectStatus.map(option => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 

@@ -15,7 +15,7 @@ urlpatterns = [
     path('telefones/',
          views.TelefoneListCreate.as_view(),
          name='list-telefone'),
-    path('download-csv/<int:schedule_id>/',
+    path('download-csv/<int:pk>/',
          views.GenerateCSVForScheduleView.as_view(),
          name='download-csv'),
 ]

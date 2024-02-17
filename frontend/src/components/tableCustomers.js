@@ -4,7 +4,16 @@ import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
 import ModalEditAppointment from './modalEditAppointment';
 import ModalView from './modalViewAppointment';
+
+const selectStatus = [
+    { value: '1', label: 'Agendado' },
+    { value: '2', label: 'Em andamento' },
+    { value: '3', label: 'Finalizado' },
+    { value: '4', label: 'Com Erro' },
+];
+
 export default function Appointment({ salesData }) {
+    
     if (!salesData || salesData.length === 0) {
         console.error('salesData não está definido ou está vazio');
         return (
@@ -71,10 +80,16 @@ export default function Appointment({ salesData }) {
 
     const Columns = [
         {
-            name: 'Nome agendamento',
+            name: 'Campanha',
             selector: row => row.campaign_name,
             sortable: true,
-            cell: row => <a>{row.campaign_name}</a>
+            cell: row => <a >{row.campaign_name}</a>
+        },
+        {
+            name: 'Agendado por:',
+            selector: row => row.USER.username,
+            sortable: true,
+            cell: row => <a>{row.USER.username}</a>
         },
         {
             name: 'Data do agendamento',
@@ -87,16 +102,16 @@ export default function Appointment({ salesData }) {
             )
         },
         {
-            name: 'Criado dia:',
-            selector: row => formatDate(row.created_at),
+            name: 'Status',
+            selector: row => row.STATUS?.status,
             sortable: true,
-            cell: row => <a>{formatDate(row.created_at)}</a>
+            cell: row => <a > {row.STATUS?.status}</a>
         },
         {
             name: 'numeros totais',
-            selector: row => row.DOCUMENT.number_valid,
+            selector: row => row.number_valid,
             sortable: true,
-            cell: row => <a> {row.DOCUMENT.number_valid}</a>
+            cell: row => <a > {row.number_valid}</a>
         },
         {
             name: 'Ações',
@@ -104,15 +119,15 @@ export default function Appointment({ salesData }) {
             allowOverflow: true,
             button: true,
             cell: row => (
-                <div className="flex items-center justify-center">
-                    <button
+                <div className="flex justify-start border rounded-md">
+                    {/* <button
                         onClick={() => handleEditClick(row)}
                         className="mr-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:outline-none"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                         </svg>
-                    </button>
+                    </button> */}
                     <button
                         onClick={() => handleViewClick(row)}
                         className="p-2 bg-green-500 text-white rounded hover:bg-green-700 focus:outline-none"
@@ -133,30 +148,47 @@ export default function Appointment({ salesData }) {
 
 
     const [filterText, setFilterText] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
 
     const filteredItems = useMemo(() => {
-        if (Array.isArray(salesData)) {
-            return salesData.filter(
-                item => item.campaign_name && item.campaign_name.toLowerCase().includes(filterText.toLowerCase())
-            );
-        }
-        return []; // Retorna um array vazio se salesData não for um array
-    }, [filterText, salesData]);
+        return salesData.filter(item => {
+            const matchesCampaignName = item.campaign_name.toLowerCase().includes(filterText.toLowerCase());
+            const matchesStatus = statusFilter ? item.STATUS?.status === statusFilter : true;
+
+            return matchesCampaignName && matchesStatus 
+        });
+    }, [filterText, statusFilter, salesData]);
+
 
     return (
         <div className="p-4">
-            <h2 className="bg-white text-xl font-semibold text-center mb-4">
-                Agendamentos
-            </h2>
-
-            <input
-                type="text"
-                placeholder="Buscar..."
-                value={filterText}
-                onChange={e => setFilterText(e.target.value)}
-                className="border border-gray-300 rounded-md p-2 w-full mb-4"
-            />
+            <h2 className="text-xl font-semibold text-center mb-4">Agendamentos</h2>
+            <div className="flex flex-wrap -mx-2 mb-4">
+                <div className="px-2 w-full sm:w-1/2 lg:w-1/4">
+                    <input
+                        type="text"
+                        placeholder="Buscar por nome da campanha..."
+                        value={filterText}
+                        onChange={e => setFilterText(e.target.value)}
+                        className="border border-gray-300 rounded-md p-2 w-full"
+                    />
+                </div>
+                <div className="px-2 w-full sm:w-1/2 lg:w-1/4">
+                    <select
+                        value={statusFilter}
+                        onChange={e => setStatusFilter(e.target.value)}
+                        className="border border-gray-300 rounded-md p-2 w-full"
+                    >
+                        <option value="">Todos os Status</option>
+                        {selectStatus.map(option => (
+                            <option key={option.value} value={option.label}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
 
             <DataTable
                 columns={Columns}
@@ -174,13 +206,13 @@ export default function Appointment({ salesData }) {
                 />
             )}
 
-            {isEditModalOpen && editingAppointment && (
+            {/* {isEditModalOpen && editingAppointment && (
                 <ModalEditAppointment
                     isOpen={isEditModalOpen}
                     onClose={() => setIsEditModalOpen(false)}
                     appointmentData={editingAppointment}
                 />
-            )}
+            )} */}
 
         </div >
     );

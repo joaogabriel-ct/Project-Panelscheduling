@@ -11,7 +11,7 @@ import re
 
 
 class ScheduleStatus(models.Model):
-    status = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, default='Agendado')
     report = models.FileField(upload_to='reported/', null=True, blank=True)
     reported = models.JSONField(null=True, blank=True)
 

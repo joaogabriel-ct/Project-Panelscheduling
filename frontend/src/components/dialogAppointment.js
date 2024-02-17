@@ -47,7 +47,7 @@ export default function Modal({ isOpen, onClose }) {
         validationSchema,
         onSubmit: async (values) => {
             const dataSelecionada = new Date(values.dataAgendamento);
-            if (dataSelecionada.getDay() === 0) {
+            if (dataSelecionada.getDay() === 7) {
                 alert('A data selecionada não pode ser um domingo.');
                 return; // Interrompe a execução do onSubmit
             }
@@ -95,8 +95,8 @@ export default function Modal({ isOpen, onClose }) {
                             headers: { 'Content-Type': 'application/json' },
                         });
         
-                        if (telefonesResponse.status === 200) {
-                            onClose(true); // Sucesso total
+                        if (telefonesResponse.status === 201) {
+                            onClose(false); // Sucesso total
                         } else {
                             throw new Error('Erro ao enviar telefones');
                         }
