@@ -3,8 +3,6 @@ import { api } from "@/service/api";
 import { withSuperUserHOC } from "@/service/auth/session";
 import { useEffect, useState } from "react";
 
-
-
 function dashboardAdmin() {
     const [events, setEvents] = useState([]);
     

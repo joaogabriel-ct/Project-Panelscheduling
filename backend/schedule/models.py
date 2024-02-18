@@ -1,7 +1,33 @@
 from django.db import models
 from django.contrib.auth.models import User
 from document.models import Document
+from django.db.models import F
 import re
+import datetime
+
+
+class AgendamentoLimite(models.Model):
+    data = models.DateField(unique=True)
+    limite = models.IntegerField(default=100000)
+    agendados = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.data} - Limite: {self.limite}"
+
+    @classmethod
+    def increment_agendados_for_date(cls, date, count):
+        obj, created = cls.objects.get_or_create(data=date, defaults={'agendados': 0})
+        obj.agendados = F('agendados') + count
+        obj.save()
+
+    @classmethod
+    def limpar_limites_antigos(cls):
+        """
+        Remove os limites de agendamento que estão mais de um mês atrás.
+        """
+        um_mes_atras = datetime.date.today() - datetime.timedelta(days=30)
+        cls.objects.filter(data__lt=um_mes_atras).delete()
+
 
 """
 | status = STATUS da operação         |

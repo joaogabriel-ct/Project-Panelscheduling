@@ -1,9 +1,38 @@
-
-import { useMemo, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
 import ModalEditAppointment from './modalEditAppointment';
 import ModalView from './modalViewAppointment';
+import ModalNumbersTable from './modalNumbers';
+
+
+const DateInputWrapper = styled.div`
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 12px;
+  margin-right: 8px;
+
+  label {
+    margin-right: 10px;
+  }
+
+  input[type="date"] {
+    border: none;
+    outline: none;
+    padding: 4px;
+    margin-right: 4px;
+  }
+`;
+
+const DateInput = ({ label, value, onChange }) => {
+    return (
+        <DateInputWrapper>
+            <label>{label}</label>
+            <input type="date" value={value} onChange={onChange} />
+        </DateInputWrapper>
+    );
+};
 
 const selectStatus = [
     { value: '1', label: 'Agendado' },
@@ -12,26 +41,38 @@ const selectStatus = [
     { value: '4', label: 'Com Erro' },
 ];
 
-export default function Appointment({ salesData }) {
-    
-    if (!salesData || salesData.length === 0) {
-        console.error('salesData não está definido ou está vazio');
-        return (
-            <div style={{
-                margin: '20px',
-                padding: '20px',
-                backgroundColor: '#ffdddd',
-                borderLeft: '6px solid #f44336',
-                borderRadius: '5px',
-                color: '#333',
-            }}>
-                <h2>Dados Não Disponíveis</h2>
-                <p>Parece que não há dados de Agendamento disponíveis no momento.</p>
-                <p>Por favor, verifique se há Agendamento registrados ou tente novamente mais tarde.</p>
-                <p>Se o problema persistir, entre em contato com o suporte técnico.</p>
-            </div>
-        );
-    }
+const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    return date.toLocaleDateString("pt-BR", {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+
+    });
+};
+
+export default function AppointmentAdmin({ salesData }) {
+    const [filterText, setFilterText] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingAppointment, setEditingAppointment] = useState(null);
+    const [isNumbersModalOpen, setIsNumbersModalOpen] = useState(false);
+    const [currentNumbersData, setCurrentNumbersData] = useState([]);
+
+    const handleViewClick = (appointment) => {
+        setSelectedAppointment(appointment);
+        setIsModalOpen(true);
+        setIsEditModalOpen(false);
+    };
+
+    const handleNumbersClick = (appointment) => {
+        setCurrentNumbersData(appointment);
+        setIsNumbersModalOpen(true);
+    };
 
     const customStyles = {
         rows: {
@@ -52,44 +93,12 @@ export default function Appointment({ salesData }) {
             },
         },
     };
-
-    const formatDate = (isoString) => {
-        const date = new Date(isoString);
-        return date.toLocaleDateString("pt-BR", {
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-
-        });
-    };
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedAppointment, setSelectedAppointment] = useState(null);
-
-    const handleViewClick = (appointment) => {
-        setSelectedAppointment(appointment);
-        setIsModalOpen(true);
-        setIsEditModalOpen(false); // Garante que apenas um modal seja aberto por vez
-    };
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editingAppointment, setEditingAppointment] = useState(null);
-
-    const handleEditClick = (appointment) => {
-        setEditingAppointment(appointment);
-        setIsEditModalOpen(true);
-    };
-
     const Columns = [
         {
             name: 'Campanha',
             selector: row => row.campaign_name,
             sortable: true,
             cell: row => <a >{row.campaign_name}</a>
-        },
-        {
-            name: 'Agendado por:',
-            selector: row => row.USER.username,
-            sortable: true,
-            cell: row => <a>{row.USER.username}</a>
         },
         {
             name: 'Data do agendamento',
@@ -111,7 +120,9 @@ export default function Appointment({ salesData }) {
             name: 'numeros totais',
             selector: row => row.number_valid,
             sortable: true,
-            cell: row => <a > {row.number_valid}</a>
+            cell: row => <a onClick={() => handleNumbersClick(row.telefones)}>
+                {row.number_valid}
+            </a>
         },
         {
             name: 'Ações',
@@ -142,24 +153,21 @@ export default function Appointment({ salesData }) {
             ),
         },
     ];
-
-
-
-
-
-    const [filterText, setFilterText] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
-
-
+    
     const filteredItems = useMemo(() => {
         return salesData.filter(item => {
             const matchesCampaignName = item.campaign_name.toLowerCase().includes(filterText.toLowerCase());
             const matchesStatus = statusFilter ? item.STATUS?.status === statusFilter : true;
+            const itemDate = new Date(item.schedule_date).getTime();
+            const start = startDate ? new Date(startDate).getTime() : null;
+            const end = endDate ? new Date(endDate).getTime() : null;
 
-            return matchesCampaignName && matchesStatus 
+            const matchesStartDate = start ? itemDate >= start : true;
+            const matchesEndDate = end ? itemDate <= end : true;
+
+            return matchesCampaignName && matchesStatus && matchesStartDate && matchesEndDate;
         });
-    }, [filterText, statusFilter, salesData]);
-
+    }, [filterText, statusFilter, startDate, endDate, salesData]);
 
     return (
         <div className="p-4">
@@ -188,8 +196,13 @@ export default function Appointment({ salesData }) {
                         ))}
                     </select>
                 </div>
+                <div className="px-2 w-full sm:w-1/2 lg:w-1/4">
+                    <DateInput label="De" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                </div>
+                <div className="px-2 w-full sm:w-1/2 lg:w-1/4">
+                    <DateInput label="Até" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                </div>
             </div>
-
             <DataTable
                 columns={Columns}
                 data={filteredItems}
@@ -198,22 +211,25 @@ export default function Appointment({ salesData }) {
                 paginationPerPage={5}
                 paginationRowsPerPageOptions={[5, 10]}
             />
-            {isModalOpen && selectedAppointment && (
-                <ModalView
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    appointmentData={selectedAppointment}
+
+            {
+                isModalOpen && selectedAppointment && (
+                    <ModalView
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        appointmentData={selectedAppointment}
+                    />
+                )
+            }
+            {isNumbersModalOpen && (
+                <div className='bg-white p-4 rounded-lg shadow-lg'>
+                <ModalNumbersTable
+                    isOpen={isNumbersModalOpen}
+                    onClose={() => setIsNumbersModalOpen(false)}
+                    numbersData={currentNumbersData}
                 />
+                </div>
             )}
-
-            {/* {isEditModalOpen && editingAppointment && (
-                <ModalEditAppointment
-                    isOpen={isEditModalOpen}
-                    onClose={() => setIsEditModalOpen(false)}
-                    appointmentData={editingAppointment}
-                />
-            )} */}
-
         </div >
     );
 }

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Schedule, ScheduleStatus, Telefone
+from .models import Schedule, ScheduleStatus, Telefone, AgendamentoLimite
 
 
 @admin.register(Schedule)
@@ -31,4 +31,14 @@ class TelefoneAdmin(admin.ModelAdmin):
         'id',
         'numero',
         'appointment_id'
+    )
+
+
+@admin.register(AgendamentoLimite)
+class AgendamentoLimiteAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'data',
+        'limite',
+        'agendados'
     )

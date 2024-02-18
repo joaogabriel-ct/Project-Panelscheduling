@@ -19,6 +19,7 @@
     "nookies": "^2.5.2",
     "react": "^18",
     "react-big-calendar": "^1.10.0",
+    "react-csv": "^2.2.2",
     "react-data-table-component": "^7.6.2",
     "react-dom": "^18",
     "react-hook-form": "^7.50.1",

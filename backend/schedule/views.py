@@ -1,36 +1,78 @@
 from rest_framework import generics
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import ScheduleSerializer, ScheduleStatusSerializer
 from .serializers import TelefoneSerializer
-from .models import Schedule, ScheduleStatus, Telefone
-from rest_framework.permissions import IsAuthenticated
-from django.views import View
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
-import csv
-from django.http import HttpResponse
+from .models import Schedule, ScheduleStatus, Telefone, AgendamentoLimite
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+from datetime import datetime
+from django.db.models import Sum
 
 
-def generate_csv_for_schedule(schedule_id):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="telefones_schedule_{schedule_id}.csv"'
+class VerificarLimiteView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    writer = csv.writer(response)
-    writer.writerow(['Número'])
+    def get(self, request, *args, **kwargs):
+        data_solicitada_str = request.query_params.get('data')
+        if not data_solicitada_str:
+            return Response({
+                "erro": "Por favor, forneça uma data no formato 'YYYY-MM-DD'."
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-    telefones = Telefone.objects.filter(appointment_id=schedule_id).values_list('numero', flat=True)
-    for numero in telefones:
-        writer.writerow([numero])
+        try:
+            data_solicitada = datetime.strptime(data_solicitada_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({
+                "erro": "Formato de data inválido. Use 'YYYY-MM-DD'."
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-    return response
+        # Tentativa de obter o objeto AgendamentoLimite para a data solicitada
+        # Se não existir, é considerado que não há limite definido e a data está livre
+        try:
+            limite = AgendamentoLimite.objects.get(data=data_solicitada)
+        except AgendamentoLimite.DoesNotExist:
+            return Response({
+                "data": data_solicitada_str,
+                "mensagem": "Data livre para agendamentos. Não há limite definido."
+            })
+
+        agendamentos = Schedule.objects.filter(schedule_date=data_solicitada)
+        total_numeros = 0
+        for agendamento in agendamentos:
+            total_numeros += agendamento.schedule_numbers.count()
+
+        # Se não houver agendamentos para a data, considera-se que a data está livre
+        if total_numeros == 0:
+            return Response({
+                "data": data_solicitada_str,
+                "limite": limite.limite,
+                "mensagem": "Data livre para agendamentos."
+            })
+        else:
+            return Response({
+                "data": data_solicitada_str,
+                "limite": limite.limite,
+                "total_numeros": total_numeros
+            })
 
 
-class GenerateCSVForScheduleView(View):
-    @method_decorator(login_required)
-    def get(self, request, schedule_id):
-        return generate_csv_for_schedule(schedule_id)
+class AjustarLimiteView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.get('data')
+        novo_limite = request.data.get('limite')
+        objeto, criado = AgendamentoLimite.objects.get_or_create(
+            data=data, defaults={'limite': novo_limite})
+        if not criado:
+            objeto.limite = novo_limite
+            objeto.save()
+        return Response({
+            'status': 'sucesso',
+            'data': data,
+            'novo_limite': novo_limite})
 
 
 class ScheduleViewSet(generics.ListCreateAPIView):
@@ -115,11 +157,12 @@ class TelefoneListCreate(generics.ListCreateAPIView):
         schedule_id = request.data.get('scheduleId')
         telefones_data = request.data.get('telefones', [])
         try:
-            schedule = Schedule.objects.get(pk=schedule_id, id_user=request.user)
+            schedule = Schedule.objects.get(
+                pk=schedule_id,
+                id_user=request.user)
         except Schedule.DoesNotExist:
-            return Response({'error': 'Agendamento não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-
-        # Processa cada número de telefone
+            return Response({'error': 'Agendamento não encontrado.'},
+                            status=status.HTTP_404_NOT_FOUND)
         created_telefones = []
         for numero in telefones_data:
             serializer = self.get_serializer(

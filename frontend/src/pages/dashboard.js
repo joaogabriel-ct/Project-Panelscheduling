@@ -5,13 +5,8 @@ import { redirect } from "next/dist/server/api-utils";
 import { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 
-
-
-
-
-
 function Dashboard({session}) {
-  const [data, setData] = useState({ appointment: [] });
+  const [data, setData] = useState([]);
   const [error, setError] = useState('');
  
 
@@ -47,16 +42,3 @@ function Dashboard({session}) {
 
 
 export default withSessionHOC(Dashboard);
-/* export const getServerSideProps = withSession(async (ctx) => {
-  const session = ctx.req.session;
-  
-  if(!session){
-    return{
-      redirect:{
-        destination:'/login',
-        permanent:false,
-      },
-    };
-  }
-  return {props: {session}};
-}) */

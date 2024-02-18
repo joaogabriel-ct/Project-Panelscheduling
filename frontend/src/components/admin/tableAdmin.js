@@ -3,6 +3,7 @@ import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
 import ModalEditAppointment from '../modalEditAppointment';
 import ModalView from '../modalViewAppointment';
+import ModalNumbersTable from '../modalNumbers';
 
 
 const DateInputWrapper = styled.div`
@@ -55,12 +56,12 @@ export default function AppointmentAdmin({ salesData }) {
     const [statusFilter, setStatusFilter] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
-
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingAppointment, setEditingAppointment] = useState(null);
+    const [isNumbersModalOpen, setIsNumbersModalOpen] = useState(false);
+    const [currentNumbersData, setCurrentNumbersData] = useState([]);
 
     const handleViewClick = (appointment) => {
         setSelectedAppointment(appointment);
@@ -71,6 +72,11 @@ export default function AppointmentAdmin({ salesData }) {
     const handleEditClick = (appointment) => {
         setEditingAppointment(appointment);
         setIsEditModalOpen(true);
+    };
+
+    const handleNumbersClick = (appointment) => {
+        setCurrentNumbersData(appointment);
+        setIsNumbersModalOpen(true);
     };
 
     const customStyles = {
@@ -125,7 +131,9 @@ export default function AppointmentAdmin({ salesData }) {
             name: 'numeros totais',
             selector: row => row.number_valid,
             sortable: true,
-            cell: row => <a > {row.number_valid}</a>
+            cell: row => <a onClick={() => handleNumbersClick(row.telefones)}>
+                {row.number_valid}
+            </a>
         },
         {
             name: 'Ações',
@@ -156,6 +164,7 @@ export default function AppointmentAdmin({ salesData }) {
             ),
         },
     ];
+    
     const filteredItems = useMemo(() => {
         return salesData.filter(item => {
             const matchesCampaignName = item.campaign_name.toLowerCase().includes(filterText.toLowerCase());
@@ -204,7 +213,7 @@ export default function AppointmentAdmin({ salesData }) {
                 <div className="px-2 w-full sm:w-1/2 lg:w-1/4">
                     <DateInput label="Até" value={endDate} onChange={e => setEndDate(e.target.value)} />
                 </div>
-            </div> 
+            </div>
             <DataTable
                 columns={Columns}
                 data={filteredItems}
@@ -233,6 +242,15 @@ export default function AppointmentAdmin({ salesData }) {
                     />
                 )
             }
+            {isNumbersModalOpen && (
+                <div className='bg-white p-4 rounded-lg shadow-lg'>
+                <ModalNumbersTable
+                    isOpen={isNumbersModalOpen}
+                    onClose={() => setIsNumbersModalOpen(false)}
+                    numbersData={currentNumbersData}
+                />
+                </div>
+            )}
         </div >
     );
 }

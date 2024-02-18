@@ -10,8 +10,11 @@ export default function Modal({ isOpen, onClose }) {
     const hoje = new Date();
     const dataMinima = new Date(hoje.getTime() + 2 * 24 * 60 * 60 * 1000);
     const dataMinimaFormatada = dataMinima.toISOString().split('T')[0];
+    const dataMaxima = addDays(new Date(), 30);
+    const dataMaximaFormatada = format(dataMaxima, 'yyyy-MM-dd');
+    const [disponibilidade, setDisponibilidade] = useState('');
 
-    if (!isOpen) return null;
+
 
     const validationSchema = Yup.object({
         nomeAgendamento: Yup.string().required("O nome do agendamento é obrigatório"),
@@ -27,14 +30,41 @@ export default function Modal({ isOpen, onClose }) {
                 'video/mp4',
             ].includes(value.type)),
         telefones: Yup.string().required("A lista de telefones é obrigatória")
-            .test(
-                'validar-telefones',
-                'Um ou mais telefones estão no formato incorreto.',
-                value => value.split('\n').every(phone =>
-                    /^\d{11}$/.test(phone.trim()) // ajuste essa regex para atender ao formato exato necessário
-                )
-            ),
     });
+    const verificarLimiteAgendamento = async (dataAgendamento) => {
+        try {
+            const response = await api.get(`/verificar-limite/?data=${dataAgendamento}`);
+            if (response.status === 200) {
+                const { limite, total_numeros } = response.data;
+                const numerosRestantes = limite - total_numeros;
+                if (numerosRestantes <= 0) {
+                    return { permitido: false, numerosRestantes: 0 };
+                } else {
+                    return { permitido: true, numerosRestantes };
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao verificar limite:', error);
+            return { permitido: false, numerosRestantes: 0 };
+        }
+    };
+
+
+    const handleDataAgendamentoBlur = async (e) => {
+        formik.handleBlur(e);
+        const dataSelecionada = e.target.value;
+        const resultado = await verificarLimiteAgendamento(dataSelecionada);
+        if (!resultado.permitido) {
+            formik.setFieldError("dataAgendamento", "Não é possível agendar para esta data. Limite alcançado.");
+        } else {
+            formik.setErrors({ ...formik.errors, dataAgendamento: '' });
+            if (resultado.numerosRestantes) {
+                setDisponibilidade(`Você ainda pode agendar ${resultado.numerosRestantes} número(s) para esta data.`);
+            } else if (resultado.mensagem) {
+                setDisponibilidade(`${resultado.mensagem}`);
+            }
+        }
+    };
 
     const formik = useFormik({
         initialValues: {
@@ -42,51 +72,46 @@ export default function Modal({ isOpen, onClose }) {
             dataAgendamento: '',
             timeAgendamento: '',
             telefones: '',
-            arquivoAgendamento: null, // Inicializado como null
+            arquivoAgendamento: null,
         },
         validationSchema,
         onSubmit: async (values) => {
+
             const dataSelecionada = new Date(values.dataAgendamento);
-            if (dataSelecionada.getDay() === 7) {
-                alert('A data selecionada não pode ser um domingo.');
-                return; // Interrompe a execução do onSubmit
+            if (dataSelecionada.getDay() === 6) {
+                alert('A data selecionada não pode ser um domingo ou já atingiu o limite de agendamentos.');
+                return;
             }
-        
             const sessionResponse = await authService.getSession();
             const session = sessionResponse.data;
             const idUser = session.user.id;
-        
-            // Primeiro, cria um FormData apenas para o arquivo
             const formDataArquivo = new FormData();
             if (values.arquivoAgendamento) {
                 formDataArquivo.append('arquivoAgendamento', values.arquivoAgendamento);
                 formDataArquivo.append('name', values.arquivoAgendamento.name);
                 formDataArquivo.append('id_user', idUser);
             }
-        
+
             try {
-                // Envia o arquivo primeiro
                 const uploadResponse = await api.post('/upload/', formDataArquivo, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
-        
+
                 if (uploadResponse.status === 201) {
-                    const idDocument = uploadResponse.data[0].id; 
+                    const idDocument = uploadResponse.data[0].id;
                     const formDataAgendamento = new FormData();
                     formDataAgendamento.append('id_user', idUser);
                     formDataAgendamento.append('campaign_name', values.nomeAgendamento);
                     formDataAgendamento.append('schedule_date', values.dataAgendamento);
                     formDataAgendamento.append('hour_schedule', values.timeAgendamento);
-                    formDataAgendamento.append('id_document', idDocument); // Anexa o ID do documento
-        
+                    formDataAgendamento.append('id_document', idDocument);
+
                     const agendamentoResponse = await api.post('/agendamento/', formDataAgendamento, {
                         headers: { 'Content-Type': 'multipart/form-data' },
                     });
-        
+
                     if (agendamentoResponse.status === 201) {
                         const scheduleId = agendamentoResponse.data.id;
-        
-                        // Finalmente, envia os telefones com o ID do agendamento
                         const telefones = values.telefones.split('\n').map(tel => tel.trim());
                         const telefonesResponse = await api.post('/telefones/', {
                             scheduleId,
@@ -94,9 +119,9 @@ export default function Modal({ isOpen, onClose }) {
                         }, {
                             headers: { 'Content-Type': 'application/json' },
                         });
-        
+
                         if (telefonesResponse.status === 201) {
-                            onClose(false); // Sucesso total
+                            onClose(false);
                         } else {
                             throw new Error('Erro ao enviar telefones');
                         }
@@ -119,6 +144,8 @@ export default function Modal({ isOpen, onClose }) {
             formik.setFieldValue("arquivoAgendamento", file);
         }
     };
+
+    if (!isOpen) return null;
     return (
         <div style={{ zIndex: 1000 }} className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full p-4" onClick={onClose} >
             <div className="relative bg-white border shadow-lg rounded-md w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl xl:max-w-2xl p-5" onClick={(e) => e.stopPropagation()}>
@@ -131,7 +158,9 @@ export default function Modal({ isOpen, onClose }) {
                                 type="text"
                                 name="nomeAgendamento"
                                 placeholder="Nome do Agendamento"
-                                onChange={formik.handleChange}
+                                onChange={(e) => {
+                                    formik.handleChange(e);
+                                }}
                                 onBlur={formik.handleBlur}
                                 value={formik.values.nomeAgendamento}
                                 className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
@@ -147,8 +176,11 @@ export default function Modal({ isOpen, onClose }) {
                                     type="date"
                                     name="dataAgendamento"
                                     min={dataMinimaFormatada}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
+                                    max={dataMaximaFormatada}
+                                    onChange={(e) => {
+                                        formik.handleChange(e);
+                                    }}
+                                    onBlur={handleDataAgendamentoBlur}
                                     value={formik.values.dataAgendamento}
                                     className="mb-4 px-3 py-2 border rounded-md w-full"
                                 />
@@ -169,6 +201,9 @@ export default function Modal({ isOpen, onClose }) {
                                 {formik.touched.timeAgendamento && formik.errors.timeAgendamento ? (
                                     <div className="text-red-500 text-sm">{formik.errors.timeAgendamento}</div>
                                 ) : null}
+                                <div className="text-sm mt-2">
+                                    {disponibilidade}
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -214,6 +249,7 @@ export default function Modal({ isOpen, onClose }) {
                         <button
                             type="submit"
                             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 focus:outline-none"
+
                         >
                             Enviar
                         </button>
