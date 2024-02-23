@@ -10,11 +10,10 @@ export default function AppointmentEditModal({ appointment, onClose, onAppointme
     const csrfToken = Cookies.get('csrftoken');
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     if (!appointment) return null;
-    console.log(appointment)
 
     const formik = useFormik({
         initialValues: {
-            status: appointment.STATUS?.status || false, // Ajustado para pegar o status do objeto STATUS, se existir
+            status: appointment.STATUS?.status || false, 
             report: null,
         },
         validationSchema: Yup.object({
@@ -23,22 +22,14 @@ export default function AppointmentEditModal({ appointment, onClose, onAppointme
         }),
         onSubmit: async (values) => {
             const formData = new FormData();
-
-            // Prepara os dados de STATUS, incluindo o status booleano e, opcionalmente, o nome do arquivo
             let statusData = {
                 status: values.status,
             };
-
-            // Se um arquivo for fornecido, adiciona o nome do arquivo ao statusData e o arquivo ao formData
             if (values.report) {
-                statusData.report = values.report.name; // Adiciona o nome do arquivo ao JSON para referência
-                formData.append('report', values.report); // Adiciona o arquivo ao formData
+                statusData.report = values.report.name;
+                formData.append('report', values.report);
             }
-
-            // Adiciona o JSON de STATUS ao FormData
             formData.append('STATUS', JSON.stringify(statusData));
-
-            // Adiciona outros campos necessários
             formData.append('campaign_name', appointment.campaign_name);
             formData.append('schedule_date', appointment.schedule_date);
             formData.append('hour_schedule', appointment.hour_schedule);

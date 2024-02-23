@@ -3,7 +3,7 @@ import { api } from "@/service/api";
 import { withSuperUserHOC } from "@/service/auth/session";
 import { useEffect, useState } from "react";
 
-function dashboardAdmin() {
+function DashboardAdmin() {
     const [events, setEvents] = useState([]);
     
     useEffect(() => {
@@ -31,4 +31,4 @@ function dashboardAdmin() {
     )
 }
 
-export default withSuperUserHOC(dashboardAdmin)
+export default withSuperUserHOC(DashboardAdmin)

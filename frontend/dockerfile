@@ -1,0 +1,26 @@
+# Use uma imagem Node.js como base
+FROM node:18-alpine
+
+# Instale o PM2 globalmente
+RUN npm install pm2 -g
+
+# Defina o diretório de trabalho dentro do contêiner
+WORKDIR /app
+
+# Copie os arquivos do projeto local para o contêiner
+COPY package*.json ./
+
+# Instale as dependências do projeto
+RUN npm install
+
+# Copie o restante dos arquivos do projeto
+COPY . .
+
+# Construa o aplicativo Next.js para produção
+RUN npm run build
+
+# Exponha a porta 3000 que o aplicativo Next.js usa por padrão
+EXPOSE 3000
+
+# Comando para iniciar o aplicativo com o PM2 quando o contêiner for iniciado
+CMD ["pm2-runtime", "npm", "--", "start"]
