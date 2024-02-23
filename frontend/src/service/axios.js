@@ -12,7 +12,7 @@ export function getAPIClient(ctx = null) {
   let token = tokenService.get(ctx)
 
   const api = axios.create({
-    baseURL: 'http://74.50.96.159:8000/api/v1/' 
+    baseURL: 'https://wpp-client.online/api/v1/' 
   })
 
   if (token) {
@@ -38,7 +38,7 @@ export function getAPIClient(ctx = null) {
       try {
         // Tenta atualizar o token aqui
         const refreshToken = ctx ? parseCookies(ctx)['refreshToken'] : localStorage.getItem('refreshToken');
-        const response = await axios.post(`http://74.50.96.159:8000/api/v1/token/refresh/`, { token: refreshToken });
+        const response = await axios.post(`https://wpp-client.online/api/v1/token/refresh/`, { token: refreshToken });
 
         const { token: newToken } = response.data;
 

@@ -19,7 +19,7 @@ export default function Login() {
 
   let message = 'Olá, estou interessado(a) em contratar os serviços oferecidos por vocês! Poderiam fornecer mais informações sobre o processo e os próximos passos? Obrigado(a)'
   const encodedMessage = encodeURIComponent(message);
-  const whatsappURL = `https://wa.me/5561999319802?text=${encodedMessage}`;
+  const whatsappURL = `https://wa.me/5511996384589?text=${encodedMessage}`;
   const router = useRouter();
 
   const onSubmit = async data => {
