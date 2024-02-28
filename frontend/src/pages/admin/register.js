@@ -11,17 +11,17 @@ const RegisterForm = () => {
                 <h1 className="text-2xl font-bold mb-8">Registro</h1>
                 <Formik
                     initialValues={{
-                        username: '',
+                        email: '',
                         password: '',
                         confirmPassword: ''
                     }}
                     validationSchema={Yup.object({
-                        username: Yup.string().email('E-mail inválido').required('Campo obrigatório'),
+                        email: Yup.string().email('E-mail inválido').required('Campo obrigatório'),
                         password: Yup.string().required('Campo obrigatório').min(6, 'Senha deve ter pelo menos 6 caracteres'),
                         confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Senhas devem coincidir').required('Campo obrigatório')
                     })}
                     onSubmit={(values, { setSubmitting, resetForm }) => {
-                        api.post('URL_DO_SEU_ENDPOINT', values)
+                        api.post('user/', values)
                             .then(response => {
                                 console.log('Resposta do servidor:', response.data);
                                 resetForm();
@@ -36,9 +36,9 @@ const RegisterForm = () => {
                 >
                     <Form className="w-full">
                         <div>
-                            <label htmlFor="username" className="block">E-mail</label>
-                            <Field type="email" name="username" className="w-full border p-2 rounded" />
-                            <ErrorMessage name="username" component="div" className="text-red-500" />
+                            <label htmlFor="email" className="block">E-mail</label>
+                            <Field type="email" name="email" className="w-full border p-2 rounded" />
+                            <ErrorMessage name="email" component="div" className="text-red-500" />
                         </div>
 
                         <div>

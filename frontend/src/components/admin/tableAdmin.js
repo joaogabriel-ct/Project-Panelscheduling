@@ -106,12 +106,6 @@ export default function AppointmentAdmin({ salesData }) {
             cell: row => <a >{row.campaign_name}</a>
         },
         {
-            name: 'Agendado por:',
-            selector: row => row.USER.username,
-            sortable: true,
-            cell: row => <a>{row.USER.username}</a>
-        },
-        {
             name: 'Data do agendamento',
             selector: row => formatDate(row.schedule_date),
             sortable: true,
@@ -120,6 +114,18 @@ export default function AppointmentAdmin({ salesData }) {
                     {formatDate(row.schedule_date)}
                 </a>
             )
+        },
+        {
+            name: 'Agendado por:',
+            selector: row => row.USER.username,
+            sortable: true,
+            cell: row => <a>{row.USER.username}</a>
+        },
+        {
+            name: 'link',
+            selector: row => row.link,
+            sortable: true,
+            cell: row => <a >{row.link}</a>
         },
         {
             name: 'Status',
@@ -131,7 +137,7 @@ export default function AppointmentAdmin({ salesData }) {
             name: 'numeros totais',
             selector: row => row.number_valid,
             sortable: true,
-            cell: row => <a onClick={() => handleNumbersClick(row.telefones)}>
+            cell: row => <a href="#" onClick={() => handleNumbersClick(row.telefones)}>
                 {row.number_valid}
             </a>
         },
@@ -164,7 +170,7 @@ export default function AppointmentAdmin({ salesData }) {
             ),
         },
     ];
-    
+
     const filteredItems = useMemo(() => {
         return salesData.filter(item => {
             const matchesCampaignName = item.campaign_name.toLowerCase().includes(filterText.toLowerCase());
@@ -244,11 +250,11 @@ export default function AppointmentAdmin({ salesData }) {
             }
             {isNumbersModalOpen && (
                 <div className='bg-white p-4 rounded-lg shadow-lg'>
-                <ModalNumbersTable
-                    isOpen={isNumbersModalOpen}
-                    onClose={() => setIsNumbersModalOpen(false)}
-                    numbersData={currentNumbersData}
-                />
+                    <ModalNumbersTable
+                        isOpen={isNumbersModalOpen}
+                        onClose={() => setIsNumbersModalOpen(false)}
+                        numbersData={currentNumbersData}
+                    />
                 </div>
             )}
         </div >

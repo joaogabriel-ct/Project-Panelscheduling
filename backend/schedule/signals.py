@@ -21,7 +21,7 @@ def update_phone_count_on_save(sender, instance, **kwargs):
     schedule = instance.appointment_id
     schedule.number = schedule.schedule_numbers.count()
     schedule.number_valid = schedule.schedule_numbers.filter(
-        numero__regex=r'^\d{11}$').count()
+        numero__regex=r'^\d{13}$').count()
     schedule.number_invalid = schedule.number - schedule.number_valid
     schedule.save()
 
@@ -32,6 +32,6 @@ def update_phone_count_on_delete(sender, instance, **kwargs):
     schedule = instance.appointment_id
     schedule.number = schedule.schedule_numbers.count()
     schedule.number_valid = schedule.schedule_numbers.filter(
-        numero__regex=r'^\d{11}$').count()
+        numero__regex=r'^\d{13}$').count()
     schedule.number_invalid = schedule.number - schedule.number_valid
     schedule.save()

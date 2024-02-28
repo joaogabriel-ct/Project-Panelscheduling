@@ -40,7 +40,7 @@ export default function AppointmentEditModal({ appointment, onClose, onAppointme
                 const response = await api.put(`agendado/${appointment.id}/`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-                        'X-CSRFToken': csrfToken, // Certifique-se de que csrfToken está corretamente definido
+                        'X-CSRFToken': csrfToken,
                     },
                 });
                 onAppointmentUpdated(response.data);

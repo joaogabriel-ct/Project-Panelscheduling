@@ -1,13 +1,24 @@
 import AppointmentAdmin from "@/components/admin/tableAdmin";
 import { api } from "@/service/api";
 import { withSuperUserHOC } from "@/service/auth/session";
+import { tokenService } from "@/service/auth/tokenService";
 import { useEffect, useState } from "react";
 
-function DashboardAdmin() {
+
+function getAccessToken(ctx) {
+    return tokenService.get(ctx);
+  }
+
+function DashboardAdmin({session}) {
     const [events, setEvents] = useState([]);
-    
+    const token = getAccessToken(session)
+
     useEffect(() => {
-        api.get('http://localhost:8000/api/v1/agendamento/')
+        api.get('agendamento/',{
+            headers:{
+              Authorization: `Bearer ${token}`
+            }
+          })
             .then(response => {
                 const appointments = response.data.map(appointment => ({
                     ...appointment,

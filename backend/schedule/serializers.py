@@ -26,9 +26,9 @@ class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = ['id', 'id_user', 'USER', 'id_document', 'DOCUMENT',
-                  'campaign_name', 'schedule_date', 'hour_schedule',
-                  'created_at', 'STATUS', 'telefones', 'number',
-                  'number_valid', 'number_invalid']
+                  'campaign_name', 'message', 'link', 'schedule_date',
+                  'hour_schedule', 'created_at', 'STATUS', 'telefones', 
+                  'number', 'number_valid', 'number_invalid']
 
     def create(self, validated_data):
         # Normal creation logic

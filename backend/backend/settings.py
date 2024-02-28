@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'change-me')
 DEBUG = bool(int(os.getenv('DEBUG',0)))
 
 
-ALLOWED_HOSTS = ['http://74.50.96.159:3000/','http://localhost:3000/']
+ALLOWED_HOSTS = ['wpp-client.online' ]
 
 # Application definition
 
@@ -46,9 +46,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['http://74.50.96.159:3000/']
 
 
 ROOT_URLCONF = 'backend.urls'

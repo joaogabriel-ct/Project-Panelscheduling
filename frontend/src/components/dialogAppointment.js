@@ -3,8 +3,7 @@ import * as Yup from 'yup';
 import { api } from '@/service/api';
 import { authService } from '@/service/auth/authService';
 import { useFormik } from 'formik';
-import { addDays, format, isSunday } from 'date-fns';
-
+import { addDays, format } from 'date-fns';
 
 export default function Modal({ isOpen, onClose }) {
     const hoje = new Date();
@@ -14,12 +13,12 @@ export default function Modal({ isOpen, onClose }) {
     const dataMaximaFormatada = format(dataMaxima, 'yyyy-MM-dd');
     const [disponibilidade, setDisponibilidade] = useState('');
 
-
-
     const validationSchema = Yup.object({
         nomeAgendamento: Yup.string().required("O nome do agendamento é obrigatório"),
+        message: Yup.string().required('O campo da mensagem é obrigatório'),
         dataAgendamento: Yup.date().required("A data do agendamento é obrigatória"),
         timeAgendamento: Yup.string().required("A hora do agendamento é obrigatória"),
+        linkAppointment: Yup.string().required("O campo do link é obrigatório"),
         arquivoAgendamento: Yup.mixed()
             .nullable()
             .required("A seleção de um arquivo é obrigatória")
@@ -31,6 +30,7 @@ export default function Modal({ isOpen, onClose }) {
             ].includes(value.type)),
         telefones: Yup.string().required("A lista de telefones é obrigatória")
     });
+
     const verificarLimiteAgendamento = async (dataAgendamento) => {
         try {
             const response = await api.get(`/verificar-limite/?data=${dataAgendamento}`);
@@ -48,7 +48,6 @@ export default function Modal({ isOpen, onClose }) {
             return { permitido: false, numerosRestantes: 0 };
         }
     };
-
 
     const handleDataAgendamentoBlur = async (e) => {
         formik.handleBlur(e);
@@ -69,14 +68,15 @@ export default function Modal({ isOpen, onClose }) {
     const formik = useFormik({
         initialValues: {
             nomeAgendamento: '',
+            message: '',
             dataAgendamento: '',
             timeAgendamento: '',
+            linkAppointment: '',
             telefones: '',
             arquivoAgendamento: null,
         },
         validationSchema,
         onSubmit: async (values) => {
-
             const dataSelecionada = new Date(values.dataAgendamento);
             if (dataSelecionada.getDay() === 6) {
                 alert('A data selecionada não pode ser um domingo ou já atingiu o limite de agendamentos.');
@@ -102,10 +102,12 @@ export default function Modal({ isOpen, onClose }) {
                     const formDataAgendamento = new FormData();
                     formDataAgendamento.append('id_user', idUser);
                     formDataAgendamento.append('campaign_name', values.nomeAgendamento);
+                    formDataAgendamento.append('message', values.message);
                     formDataAgendamento.append('schedule_date', values.dataAgendamento);
                     formDataAgendamento.append('hour_schedule', values.timeAgendamento);
+                    formDataAgendamento.append('link', values.linkAppointment);
                     formDataAgendamento.append('id_document', idDocument);
-
+                    console.log(formDataAgendamento)
                     const agendamentoResponse = await api.post('/agendamento/', formDataAgendamento, {
                         headers: { 'Content-Type': 'multipart/form-data' },
                     });
@@ -133,7 +135,6 @@ export default function Modal({ isOpen, onClose }) {
                 }
             } catch (error) {
                 console.error('Falha no processo:', error.message);
-                // Aqui você pode definir como deseja tratar e exibir os erros de validação para o usuário
             }
         }
     });
@@ -147,10 +148,10 @@ export default function Modal({ isOpen, onClose }) {
 
     if (!isOpen) return null;
     return (
-        <div style={{ zIndex: 1000 }} className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full p-4" onClick={onClose} >
-            <div className="relative bg-white border shadow-lg rounded-md w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl xl:max-w-2xl p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border shadow-lg rounded-md max-w-lg w-full p-5 overflow-y-auto z-50" style={{ maxWidth: 'calc(100vw - 40px)', maxHeight: 'calc(100vh - 40px)' }} onClick={onClose}>
+            <div onClick={(e) => e.stopPropagation()}>
                 <form onSubmit={formik.handleSubmit}>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Agendar Mailing</h3>
+                    <h3 className="text-lg m-4 leading-6 font-medium text-gray-900">Agendar Mailing</h3>
                     <div className="mt-2">
                         <div>
                             <label>Digite nome do agendamento</label>
@@ -167,6 +168,24 @@ export default function Modal({ isOpen, onClose }) {
                             />
                             {formik.touched.nomeAgendamento && formik.errors.nomeAgendamento ? (
                                 <div className="text-red-500 text-sm">{formik.errors.nomeAgendamento}</div>
+                            ) : null}
+                        </div>
+                        <div>
+                            <textarea
+                                style={{ resize: 'none', minHeight: '100px' }}
+                                rows="10"
+                                type="text"
+                                name="message"
+                                placeholder="Escreva aqui a sua mensagem"
+                                onChange={(e) => {
+                                    formik.handleChange(e);
+                                }}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.message}
+                                className="py-2 border rounded-md w-full"
+                            />
+                            {formik.touched.message && formik.errors.message ? (
+                                <div className="text-red-500 text-sm">{formik.errors.message}</div>
                             ) : null}
                         </div>
                         <div className="flex flex-wrap -mx-3 mb-4">
@@ -207,10 +226,11 @@ export default function Modal({ isOpen, onClose }) {
                             </div>
                         </div>
                         <div>
-                            <label>Selecione um arquivo</label>
+                            <label>Arquivos de midia</label>
                             <input
                                 type="file"
                                 name="arquivoAgendamento"
+                                placeholder='Midia'
                                 onChange={handleFileChange}
                                 onBlur={formik.handleBlur}
                                 className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
@@ -221,17 +241,35 @@ export default function Modal({ isOpen, onClose }) {
                             ) : null}
                         </div>
                         <div>
+                            <label>Link do botão</label>
+                            <input
+                                type="text"
+                                name="linkAppointment"
+                                placeholder='Coloque aqui o link'
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.linkAppointment}
+                                className="mb-4 px-3 py-2 border rounded-md w-full"
+                            />
+                            {formik.touched.linkAppointment && formik.errors.linkAppointment ? (
+                                <div className="text-red-500 text-sm">{formik.errors.linkAppointment}</div>
+                            ) : null}
+                            <div className="text-sm mt-2">
+                                {disponibilidade}
+                            </div>
+                        </div>
+                        <div>
                             <label htmlFor="telefones">Destinatário(s)</label>
                             <textarea
                                 id="telefones"
-                                name="telefones"
-                                resize='none'
+                                style={{ resize: 'none' }}
                                 rows="10"
+                                type="text"
                                 placeholder="Digite os números de telefone aqui, um por linha."
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                                 value={formik.values.telefones}
-                                className="border rounded-md w-full p-2"
+                                className="py-2 border rounded-md w-full"
                             />
                             {formik.touched.telefones && formik.errors.telefones ? (
                                 <div className="text-red-500 text-sm">{formik.errors.telefones}</div>
@@ -249,13 +287,12 @@ export default function Modal({ isOpen, onClose }) {
                         <button
                             type="submit"
                             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 focus:outline-none"
-
                         >
                             Enviar
                         </button>
                     </div>
                 </form>
             </div>
-        </div >
+        </div>
     );
 }

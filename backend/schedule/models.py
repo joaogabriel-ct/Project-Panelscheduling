@@ -76,7 +76,9 @@ class Schedule(models.Model):
                                 related_name='user_scheduled')
     id_document = models.ForeignKey(Document, on_delete=models.CASCADE,
                                     related_name='doc_schedule')
-    campaign_name = models.CharField(max_length=200)
+    campaign_name = models.CharField(max_length=200, default='default_campaign')
+    message = models.TextField(null=True, blank=True)
+    link = models.URLField(null=True, blank=True)
     schedule_date = models.DateField(null=True, blank=True)
     hour_schedule = models.TimeField(auto_now_add=True, blank=False)
     status = models.ForeignKey(ScheduleStatus, on_delete=models.CASCADE,

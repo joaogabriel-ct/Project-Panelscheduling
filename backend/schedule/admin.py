@@ -8,6 +8,8 @@ class ScheduleAdmin(admin.ModelAdmin):
         'id',
         'id_user',
         'campaign_name',
+        'message',
+        'link',
         'schedule_date',
         'hour_schedule',
         'created_at',

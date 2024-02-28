@@ -1,9 +1,11 @@
+// Importe os módulos necessários
 import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { api } from '@/service/api';
 import { authService } from '@/service/auth/authService';
 
+// Define a lista de opções para o campo de seleção de status
 const selectStatus = [
     { value: 'Agendado', label: 'Agendado' },
     { value: 'Em andamento', label: 'Em andamento' },
@@ -11,69 +13,50 @@ const selectStatus = [
     { value: 'Com Erro', label: 'Com Erro' },
 ]
 
+// Componente ModalEditAppointment
 export default function ModalEditAppointment({ isOpen, onClose, appointmentData, onSave }) {
+    // Defina o useFormik para gerenciar o estado do formulário
     const formik = useFormik({
         initialValues: {
-            campaign_name: appointmentData.campaign_name,
+            message: appointmentData.message,
             schedule_date: appointmentData.schedule_date,
-            hour_schedule: appointmentData.hour_schedule.slice(0, 5), // Assumindo que você queira editar só a hora
+            hour_schedule: appointmentData.hour_schedule.slice(0, 5),
+            link: appointmentData.link,
             status: appointmentData.STATUS.status,
-            // Inclua outros campos conforme necessário
         },
         validationSchema: Yup.object({
-            campaign_name: Yup.string().required("O nome do agendamento é obrigatório"),
+            message: Yup.string().required("A mensagem do agendamento é obrigatória"),
             schedule_date: Yup.date().required("A data do agendamento é obrigatória"),
             hour_schedule: Yup.string().required('O horário é obrigatório'),
+            link:Yup.string().required('O campo com o Link é obrigatório'),
             status: Yup.string().required('O status é obrigatório'),
-            // Validações adicionais conforme necessário
         }),
         onSubmit: (values) => {
             handleSubmit(values);
         },
     });
 
+    // Função para lidar com o envio do formulário
     const handleSubmit = async (values) => {
-        // Construindo o objeto com os valores atualizados
         const updatedData = {
             ...appointmentData,
-            campaign_name: values.campaign_name,
+            message: values.message,
             schedule_date: values.schedule_date,
             hour_schedule: values.hour_schedule,
-            STATUS: { ...appointmentData.STATUS, status: values.status }, 
-            
+            link: values.link,
+            STATUS: { ...appointmentData.STATUS, status: values.status },
         };
 
         try {
             const response = await api.put(`/agendado/${appointmentData.id}/`, updatedData);
-            // Processamento adicional conforme necessário, como fechar o modal
             onClose();
-            onSave && onSave(response.data); // Se houver função onSave passada como prop, chame-a com os dados atualizados
+            onSave && onSave(response.data);
         } catch (error) {
             console.error('Erro ao atualizar o agendamento:', error.message);
         }
     };
-    /* onSubmit: async (values) => {
-        const statusJson = JSON.stringify({ status: values.status });
-        try {
-            const sessionResponse = await authService.getSession();
-            const session = sessionResponse.data;
-            const idUser = session.user.id;
-            console.log(appointmentData)
-            const formData = new FormData();
-            formData.append('campaign_name', values.nomeAgendamento);
-            formData.append('schedule_date', values.dataAgendamento);
-            formData.append('hour_schedule', values.timeAgendamento);
-            formData.append('id_document', appointmentData.DOCUMENT.id);
-            formData.append('id_user', idUser);
-            formData.append('STATUS', statusJson);
-            const putResponse = await api.put(`/agendado/${appointmentData.id}/`, formData);
-            onClose(false);
-        } catch (error) {
-            console.error('Falha no processo:', error.message);
-        }
-    },
-});
-*/
+
+    // Renderização condicional do componente com base no estado isOpen
     if (!isOpen) return null;
 
     return (
@@ -83,16 +66,17 @@ export default function ModalEditAppointment({ isOpen, onClose, appointmentData,
                     <h3 className="text-lg leading-6 font-medium text-gray-900">Editar Mailing</h3>
                     <div className="mt-2">
                         <div>
-                            <label>Digite nome do agendamento</label>
-                            <input
-                                type="text"
-                                name="campaign_name"
-                                placeholder="Nome do Agendamento"
+                            <label>Digite os detalhes do agendamento</label>
+                            <textarea
+                                name="message"
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
-                                value={formik.values.campaign_name}
+                                value={formik.values.message}
                                 className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
                             />
+                            {formik.touched.message && formik.errors.message && (
+                                <div className="text-red-500">{formik.errors.message}</div>
+                            )}
                         </div>
                         <div className="flex flex-wrap -mx-3 mb-4">
                             <div className="w-full md:w-1/2 px-3 mb-4 md:mb-0">
@@ -105,9 +89,12 @@ export default function ModalEditAppointment({ isOpen, onClose, appointmentData,
                                     value={formik.values.schedule_date}
                                     className="mb-4 px-3 py-2 border rounded-md w-full"
                                 />
+                                {formik.touched.schedule_date && formik.errors.schedule_date && (
+                                    <div className="text-red-500">{formik.errors.schedule_date}</div>
+                                )}
                             </div>
                             <div className="w-full md:w-1/2 px-3">
-                                <label>Selecione um horario</label>
+                                <label>Selecione um horário</label>
                                 <input
                                     type="time"
                                     name="hour_schedule"
@@ -116,6 +103,23 @@ export default function ModalEditAppointment({ isOpen, onClose, appointmentData,
                                     value={formik.values.hour_schedule}
                                     className="mb-4 px-3 py-2 border rounded-md w-full"
                                 />
+                                {formik.touched.hour_schedule && formik.errors.hour_schedule && (
+                                    <div className="text-red-500">{formik.errors.hour_schedule}</div>
+                                )}
+                            </div>
+                            <div className="w-full px-3 mb-4">
+                                <label>Link do Agendamento</label>
+                                <input
+                                    type='text'
+                                    name="link"
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.link}
+                                    className="mt-2 mb-4 px-3 py-2 border rounded-md w-full"
+                                />  
+                                {formik.touched.link && formik.errors.link && (
+                                    <div className="text-red-500">{formik.errors.link}</div>
+                                )}
                             </div>
                             <div className="w-full px-3 mb-4">
                                 <label>Status do Agendamento</label>
@@ -132,9 +136,11 @@ export default function ModalEditAppointment({ isOpen, onClose, appointmentData,
                                         </option>
                                     ))}
                                 </select>
+                                {formik.touched.status && formik.errors.status && (
+                                    <div className="text-red-500">{formik.errors.status}</div>
+                                )}
                             </div>
                         </div>
-
                     </div>
                     <div className="flex justify-end space-x-4 mt-3">
                         <button
