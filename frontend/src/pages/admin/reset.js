@@ -10,34 +10,34 @@ const ChangePasswordForm = () => {
             <h1 className="text-2xl font-semibold mb-4">Trocar Senha</h1>
             <Formik
                 initialValues={{
-                    currentPassword: '',
+                    username: '',
                     newPassword: '',
                     confirmNewPassword: ''
                 }}
                 validationSchema={Yup.object({
-                    currentPassword: Yup.string().required('Campo obrigatório'),
+                    username: Yup.string().required('Campo obrigatório'),
                     newPassword: Yup.string().required('Campo obrigatório').min(6, 'Senha deve ter pelo menos 6 caracteres'),
                     confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'Senhas devem coincidir').required('Campo obrigatório')
                 })}
                 onSubmit={(values, { setSubmitting, resetForm }) => {
-                    api.post('URL_PARA_TROCA_DE_SENHA', values)
+                    api.post('reset/', values)
                         .then(response => {
                             console.log('Resposta do servidor:', response.data);
-                            resetForm(); // Limpa o formulário após o envio bem-sucedido
+                            resetForm(); 
                         })
                         .catch(error => {
                             console.error('Erro ao enviar dados:', error);
                         })
                         .finally(() => {
-                            setSubmitting(false); // Define o estado de submissão de volta para false
+                            setSubmitting(false);
                         });
                 }}
             >
                 <Form className="flex flex-col gap-4">
                     <div className="flex flex-col">
-                        <label htmlFor="currentPassword" className="text-sm">Senha Atual</label>
-                        <Field type="password" name="currentPassword" className="border rounded-md p-2" />
-                        <ErrorMessage name="currentPassword" component="div" className="text-red-500 text-sm" />
+                        <label htmlFor="username" className="text-sm">Nome do Usuario</label>
+                        <Field type="text" name="username" className="border rounded-md p-2" />
+                        <ErrorMessage name="username" component="div" className="text-red-500 text-sm" />
                     </div>
 
                     <div className="flex flex-col">

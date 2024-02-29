@@ -9,7 +9,7 @@ services:
       - 8000:8000
     volumes:
       - .:/backend
-      - ./media:/backend/media
+      - ./media/temp_arquivos:/backend/media/temp_arquivos
     env_file:
       - ./dotenv_file/.env    
     depends_on:

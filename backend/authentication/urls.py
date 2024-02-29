@@ -6,9 +6,9 @@ from rest_framework_simplejwt.views import (
 from authentication.views import (
      ValidateTokenView,
      UserViewSet,
-     UserRetriveUpdateDestroyView
+     UserRetriveUpdateDestroyView,
+     reset_password_by_admin
      )
-
 
 urlpatterns = [
     path('login/', TokenObtainPairView.as_view(),
@@ -20,5 +20,8 @@ urlpatterns = [
     path('user/', UserViewSet.as_view(),
          name='Create-user'),
     path('user/<int:pk>/', UserRetriveUpdateDestroyView.as_view(),
-         name='Edit-User')
+         name='Edit-User'),
+    path('reset/', reset_password_by_admin,
+         name='Edit-password-User'),
+    
 ]
